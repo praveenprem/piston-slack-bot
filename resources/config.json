@@ -1,0 +1,17 @@
+{
+  "ip": "0.0.0.0",
+  "timeout": 15,
+  "port": 8095,
+  "tls": {
+    "enable": false,
+    "certPath": null,
+    "certKeyPath": null,
+    "proto": "TLSv1.1"
+  },
+  "slack": {
+    "appId": "",
+    "clientId": "",
+    "clientSecret": "",
+    "signingSig": ""
+  }
+}
