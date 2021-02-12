@@ -1,0 +1,15 @@
+[Unit]
+Description=TestBed Bot
+After=nginx.service
+StartLimitBurst=5
+StartLimitIntervalSec=10
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=root
+ExecStart=/var/testbed-bot/testbed-bot --config-path /var/testbed-bot/config.json
+
+[Install]
+WantedBy=multi-user.target
