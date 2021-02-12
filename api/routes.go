@@ -42,4 +42,12 @@ var routes = Routes{
 		Secure:      false,
 		HandlerFunc: controllers.Execute,
 	},
+	Route{
+		Name:        "Authorise",
+		//Headers:     []string{"Accept", "*"},
+		Method:      []string{http.MethodGet, http.MethodOptions},
+		Path:        "auth",
+		Secure:      false,
+		HandlerFunc: controllers.Authorise,
+	},
 }

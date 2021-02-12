@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -75,7 +76,9 @@ func appRecovery(next http.Handler) http.Handler {
 
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json")
+		if !strings.Contains(r.URL.Path, "auth") {
+			w.Header().Add("Content-Type", "application/json")
+		}
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")

@@ -1,11 +1,13 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -60,6 +62,25 @@ type (
 	Payloader interface {
 		Parser(r *http.Request) error
 		Validate() error
+	}
+
+	Auth struct {
+		IsOk       bool `json:"ok"`
+		Error      string `json:"error,omitempty"`
+		AppId      string `json:"app_id,omitempty"`
+		AuthedUser struct {
+			Id string `json:"id,omitempty"`
+		} `json:"authed_user,omitempty"`
+		Scope       string `json:"scope,omitempty"`
+		TokenType   string `json:"token_type,omitempty"`
+		AccessToken string `json:"access_token,omitempty"`
+		BotUserId   string `json:"bot_user_id,omitempty"`
+		Team        struct {
+			Id   string `json:"id,omitempty"`
+			Name string `json:"name,omitempty"`
+		} `json:"team,omitempty"`
+		Enterprise          string `json:"enterprise,omitempty"`
+		IsEnterpriseInstall bool `json:"is_enterprise_install,omitempty"`
 	}
 
 	Config struct {
@@ -494,6 +515,36 @@ func (p *Payload) Validate(slack *Slack) error {
 	}
 
 	log.Printf("validation completed")
+
+	return nil
+}
+
+func (a *Auth) Authorise(code string) error {
+	client := new(http.Client)
+	data := url.Values{}
+	data.Set("code", code)
+	data.Set("client_id", CFG.ClientId)
+	data.Set("client_secret", CFG.ClientSecret)
+
+	req, _ := http.NewRequest(http.MethodPost, "https://slack.com/api/oauth.v2.access", strings.NewReader(data.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, reqErr := client.Do(req)
+	if reqErr != nil {
+		return reqErr
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(resp.Status)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&a); err != nil {
+		return err
+	}
+
+	if a.Error != "" {
+		return errors.New(a.Error)
+	}
 
 	return nil
 }
